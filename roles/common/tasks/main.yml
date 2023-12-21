@@ -1,0 +1,37 @@
+---
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    name: "*"
+    state: latest
+  when: ansible_os_family == "Debian"
+
+- name: Install dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - imagemagick
+    - ffmpeg
+    - libpq-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - file
+    - git
+    - g++
+    - libprotobuf-dev
+    - protobuf-compiler
+    - pkg-config
+    - nodejs
+    - gcc
+    - autoconf
+    - bison
+    - build-essential
+    - libssl-dev
+    - libyaml-dev
+    - libreadline6-dev
+    - zlib1g-dev
+    - libncurses5-dev
+    - libffi-dev
+    - libgdbm-dev

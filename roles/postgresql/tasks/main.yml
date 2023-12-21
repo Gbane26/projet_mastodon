@@ -1,0 +1,90 @@
+---
+
+# - name : Include files vars
+#   include_vars: vars/vars.yml
+
+
+- name: Install PostgreSQL
+  apt:
+    name: postgresql
+    state: present
+  become: true
+
+
+- name: Get PostgreSQL version
+  shell: psql --version | head -n 1 | awk '{print $3}' | awk -F. '{print $1}'
+  register: postgresql_version
+  changed_when: false
+  ignore_errors: true
+
+
+
+- name: Configure PostgreSQL authentication for user postgres
+  lineinfile:
+    path: "/etc/postgresql/{{ postgresql_version.stdout }}/main/pg_hba.conf"
+    line: "local   all             postgres                                md5"
+  become: true
+  notify: Restart PostgreSQL
+
+# - name: "Start and enable services"
+#   service: "name={{ item }} state=started enabled=yes"
+#   with_items:
+#     - postgresql
+
+
+- name: Create PostgreSQL user for Mastodon
+  postgresql_user:
+    db: mastodon_production
+    # login_user: postgres
+    name: mastodon
+    password: mastodon
+    state: present
+
+- name: Create PostgreSQL database for Mastodon
+  postgresql_db:
+    name: mastodon_production
+    owner: mastodon
+    # login_user: postgres
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+    state: present
+
+
+# - name: "Create app database"
+#   postgresql_db:
+#     state: present
+#     name: "{{ db_name }}"
+#   become: yes
+#   become_user: postgres
+
+# - name: "Create db user"
+#   postgresql_user:
+#     state: present
+#     name: "{{ db_user }}"
+#     password: "{{ db_password }}"
+#   become: yes
+#   become_user: postgres
+
+# - name: "Grant db user access to app db"
+#   postgresql_privs:
+#     type: database
+#     database: "{{ db_name }}"
+#     roles: "{{ db_user }}"
+#     grant_option: no
+#     privs: all
+#   become: yes
+#   become_user: postgres
+
+# - name: "Allow md5 connection for the db user"
+#   postgresql_pg_hba:
+#     dest: "~/data/pg_hba.conf"
+#     contype: host
+#     databases: all
+#     method: md5
+#     users: "{{ db_user }}"
+#     create: true
+#   become: yes
+#   become_user: postgres
+#   notify: Restart PostgreSQL

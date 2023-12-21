@@ -1,0 +1,26 @@
+---
+
+- name: Install Node.js and Yarn
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nodejs
+    - npm
+  notify:
+    - Run Yarn Install
+
+- name: Import Yarn GPG key
+  command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 23E7166788B63E1E
+  become: true
+
+- name: Add Yarn repository and install Yarn
+  apt_repository:
+    repo: deb https://dl.yarnpkg.com/debian/ stable main
+    state: present
+    update_cache: yes
+
+- name: Install Yarn
+  apt:
+    name: yarn
+    state: present

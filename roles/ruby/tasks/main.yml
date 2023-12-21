@@ -1,0 +1,42 @@
+---
+
+- name: Install rbenv
+  git:
+    repo: https://github.com/rbenv/rbenv.git
+    dest: ~/.rbenv
+    version: master
+  register: rbenv_installed
+
+- name: Add rbenv to PATH
+  lineinfile:
+    path: ~/.bashrc
+    line: 'export PATH="$HOME/.rbenv/bin:$PATH"'
+  when: rbenv_installed.changed
+
+- name: Add rbenv init to bashrc
+  lineinfile:
+    path: ~/.bashrc
+    line: 'eval "$(rbenv init -)"'
+  when: rbenv_installed.changed
+
+- name: Reload shell
+  command: exec $SHELL
+  when: rbenv_installed.changed
+
+- name: Install ruby-build plugin
+  git:
+    repo: https://github.com/rbenv/ruby-build.git
+    dest: ~/.rbenv/plugins/ruby-build
+    version: master
+
+- name: Install Ruby 3.2.2
+  command: "{{ lookup('env', 'HOME') }}/.rbenv/bin/rbenv install 3.2.2"
+  environment:
+    PATH: "{{ lookup('env', 'HOME') }}/.rbenv/bin:{{ lookup('env', 'PATH') }}"
+  register: ruby_installed
+
+- name: Set global Ruby version to 3.2.2
+  command: "{{ lookup('env', 'HOME') }}/.rbenv/bin/rbenv global 3.2.2"
+  environment:
+    PATH: "{{ lookup('env', 'HOME') }}/.rbenv/bin:{{ lookup('env', 'PATH') }}"
+  when: ruby_installed.changed

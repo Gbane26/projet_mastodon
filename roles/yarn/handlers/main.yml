@@ -1,0 +1,4 @@
+---
+
+- name: Run Yarn Install
+  command: yarn install --pure-lockfile

@@ -1,0 +1,4 @@
+---
+db_user: mastodon
+db_password: mastodon
+db_name: mastodon_production
